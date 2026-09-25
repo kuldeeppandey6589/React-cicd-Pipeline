@@ -1,19 +1,20 @@
-services:
+version: '3.8'
 
+services:
   mongo:
-    image: mongo
+    image: mongo:latest
     container_name: mongodb
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-
     networks:
-      - test  
+      - test
+    restart: unless-stopped
 
   backend:
     build: ./backend
-    image: kuldeepofficial/backend:latest
+    image: kuldeepofficial/backend:local
     container_name: backend
     ports:
       - "5000:5000"
@@ -27,13 +28,12 @@ services:
     depends_on:
       - mongo
     restart: unless-stopped
-
     networks:
       - test
 
   frontend:
     build: ./frontend
-    image: kuldeepofficial/frontend:latest
+    image: kuldeepofficial/frontend:local
     container_name: frontend
     ports:
       - "3000:5173"
@@ -49,9 +49,12 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
-
     networks:
       - test
+
+networks:
+  test:
+    driver: bridge
 
 volumes:
   mongo-data:
