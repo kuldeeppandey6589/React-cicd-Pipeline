@@ -8,8 +8,13 @@ services:
     volumes:
       - mongo-data:/data/db
 
+    networks:
+      - test  
+
   backend:
     build: ./backend
+    image: kuldeepofficial/backend:latest
+    container_name: backend
     ports:
       - "5000:5000"
     volumes:
@@ -23,8 +28,13 @@ services:
       - mongo
     restart: unless-stopped
 
+    networks:
+      - test
+
   frontend:
     build: ./frontend
+    image: kuldeepofficial/frontend:latest
+    container_name: frontend
     ports:
       - "3000:5173"
     volumes:
@@ -39,6 +49,9 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
+
+    networks:
+      - test
 
 volumes:
   mongo-data:
