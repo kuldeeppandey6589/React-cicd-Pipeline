@@ -1,8 +1,8 @@
+version: '3.8'
 
 services:
-
   mongo:
-    image: mongo:4.4.6 
+    image: mongo:latest
     container_name: mongodb
     ports:
       - "27017:27017"
@@ -13,93 +13,48 @@ services:
     restart: unless-stopped
 
   backend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: kuldeepofficial/backend:latest
-    container_name: test-backend
-    restart: always
+    build: ./backend
+    image: kuldeepofficial/backend:local
+    container_name: backend
     ports:
-      - "8080:8080"
-    env_file:
-      - .env
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - test
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: kuldeepofficial/frontend:latest
-    container_name: test-frontend
-    restart: always
+    build: ./frontend
+    image: kuldeepofficial/frontend:local
+    container_name: frontend
     ports:
-      - "3000:3000"
-
-volumes:
-  mongo-data:
+      - "3000:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=true
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - test
 
 networks:
   test:
     driver: bridge
 
-
-
-# version: '3.8'
-
-# services:
-#   mongo:
-#     image: mongo:latest
-#     container_name: mongodb
-#     ports:
-#       - "27017:27017"
-#     volumes:
-#       - mongo-data:/data/db
-#     networks:
-#       - test
-#     restart: unless-stopped
-
-#   backend:
-#     build: ./backend
-#     image: kuldeepofficial/backend:local
-#     container_name: backend
-#     ports:
-#       - "5000:5000"
-#     volumes:
-#       - ./backend:/app
-#       - /app/node_modules
-#     environment:
-#       - CHOKIDAR_USEPOLLING=true
-#       - WATCHPACK_POLLING=true
-#       - NODE_ENV=development
-#     depends_on:
-#       - mongo
-#     restart: unless-stopped
-#     networks:
-#       - test
-
-#   frontend:
-#     build: ./frontend
-#     image: kuldeepofficial/frontend:local
-#     container_name: frontend
-#     ports:
-#       - "3000:5173"
-#     volumes:
-#       - ./frontend:/app
-#       - /app/node_modules
-#     environment:
-#       - CHOKIDAR_USEPOLLING=true
-#       - WATCHPACK_POLLING=true
-#       - FAST_REFRESH=true
-#     depends_on:
-#       - backend
-#     stdin_open: true
-#     tty: true
-#     restart: unless-stopped
-#     networks:
-#       - test
-
-# networks:
-#   test:
-#     driver: bridge
-
-# volumes:
-#   mongo-data:
+volumes:
+  mongo-data:
